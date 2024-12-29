@@ -58,5 +58,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: eu-west-2
         working-directory: ./src/NotifyService.Api
-        run: |
-          dotnet lambda deploy-serverless NotifyService
+        run: dotnet lambda deploy-serverless --template ./serverless.yml --stack-name NotifyService --region $AWS_REGION
