@@ -35,7 +35,7 @@ jobs:
 
       # Run tests
       - name: Run unit tests
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test
 
   deploy:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main')
