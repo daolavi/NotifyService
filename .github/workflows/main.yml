@@ -51,18 +51,14 @@ jobs:
       - name: Install Amazon Lambda Tools
         run:  dotnet tool install -g Amazon.Lambda.Tools
 
-      # Package the Lambda function
-      - name: Package Lambda
-        working-directory: ./src/NotifyService.Api
-        run: dotnet lambda package --configuration Release --output-package ./MyLambdaApi.zip
-
       # Deploy to AWS Lambda
       - name: Deploy to AWS Lambda
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: us-east-1
+        working-directory: ./src/NotifyService.Api
         run: |
           dotnet lambda deploy-function NotifyService \
-            --region us-east-1 \
+            --region eu-west-2 \
             --function-role AWSLambdaBasicExecutionRole
