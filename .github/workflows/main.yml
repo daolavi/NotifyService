@@ -60,5 +60,4 @@ jobs:
         working-directory: ./src/NotifyService.Api
         run: |
           dotnet lambda deploy-function NotifyService \
-            --region eu-west-2 \
-            --function-role AWSLambdaBasicExecutionRole
+            --region eu-west-2
