@@ -4,7 +4,7 @@ inputs:
    aws-access-key:
      required: true
      description: "AWS Access Key"
-   aws-secret-key:
+   aws-secret-access-key:
      required: true
      description: "AWS Secret Key"
    aws-region:
@@ -35,7 +35,7 @@ runs:
     - uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-access-key-id: ${{ inputs.aws-access-key-id }}
-        aws-secret-key: ${{ inputs.aws-secret-key }}
+        aws-secret-access-key: ${{ inputs.aws-secret-key }}
         aws-region: ${{ inputs.aws-region }}
     
     # Build and deploy x86
