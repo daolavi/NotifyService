@@ -1,0 +1,63 @@
+name: CI/CD Pipeline
+
+on:
+  # Trigger on pull requests
+  pull_request:
+    branches:
+      - main
+
+  # Trigger on pushes to the main branch
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Setup .NET
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0'
+
+      # Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # Build the project
+      - name: Build the project
+        run: dotnet build --configuration Release
+
+      # Run tests
+      - name: Run unit tests
+        run: dotnet test --no-build --verbosity normal
+
+  deploy:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main')
+    needs: build-and-test  # Ensure build and test job completes successfully
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Package the Lambda function
+      - name: Package Lambda
+        run: dotnet lambda package --configuration Release --output-package ./MyLambdaApi.zip
+
+      # Deploy to AWS Lambda
+      - name: Deploy to AWS Lambda
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+        run: |
+          dotnet lambda deploy-function NotifyService \
+            --region us-east-1 \
+            --function-role AWSLambdaBasicExecutionRole
