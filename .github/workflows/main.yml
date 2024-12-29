@@ -47,6 +47,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Install Lambda tools
+      - name: Install Amazon Lambda Tools
+        run: dotnet tool install -g Amazon.Lambda.Tools
+
       # Package the Lambda function
       - name: Package Lambda
         run: dotnet lambda package --configuration Release --output-package ./MyLambdaApi.zip
