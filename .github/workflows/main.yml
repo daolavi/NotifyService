@@ -43,20 +43,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: checkoutRepo
+        uses: actions/checkout@v2  
 
-      # Install Lambda tools
-      - name: Install Amazon Lambda Tools
-        run:  dotnet tool install -g Amazon.Lambda.Tools
-
-      # Deploy to AWS Lambda
-      - name: Deploy to AWS Lambda
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: eu-west-2
-        working-directory: ./src/NotifyService.Api
-        run: |
-          dotnet lambda deploy-function NotifyService
+      - name: Build and Deploy
+        uses: ./.github/actions/sam-build-and-deploy
+        with:
+          aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'eu-west-2'
+          dotnet-version: '8.x'
+          template-file-path: ./src/NotifyService.Api/serveless.template
+          stack-name: daotest
+          s3-bucket-name: daonotifyservice
+      
