@@ -35,7 +35,7 @@ jobs:
 
       # Run tests
       - name: Run unit tests
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test
 
   deploy:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main')
@@ -47,17 +47,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Package the Lambda function
-      - name: Package Lambda
-        run: dotnet lambda package --configuration Release --output-package ./MyLambdaApi.zip
+      # Install Lambda tools
+      - name: Install Amazon Lambda Tools
+        run:  dotnet tool install -g Amazon.Lambda.Tools
 
       # Deploy to AWS Lambda
       - name: Deploy to AWS Lambda
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: us-east-1
+          AWS_REGION: eu-west-2
+        working-directory: ./src/NotifyService.Api
         run: |
-          dotnet lambda deploy-function NotifyService \
-            --region us-east-1 \
-            --function-role AWSLambdaBasicExecutionRole
+          dotnet lambda deploy-function NotifyService
