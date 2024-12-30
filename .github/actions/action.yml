@@ -33,10 +33,7 @@ runs:
     - uses: aws-actions/setup-sam@v2
       with:
           use-installer: true
-          
-    - run: env | grep AWS
-      shell: bash
-      
+               
     - uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-access-key-id: ${{ inputs.aws-access-key-id }}
