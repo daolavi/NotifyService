@@ -55,7 +55,7 @@ jobs:
         with:
           aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: 'eu-west-2'
+          aws-region: eu-west-2
           dotnet-version: '8.x'
           template-file-path: ./src/NotifyService.Api/serveless.template
           stack-name: daotest
