@@ -23,7 +23,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.0'
+          dotnet-version: '8.x'
 
       # Restore dependencies
       - name: Restore dependencies
@@ -49,8 +49,7 @@ jobs:
       - name: Build and Deploy
         uses: ./.github/actions
         with:
-          aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-role: ${{ secrets.AWS_SAM_DEPLOYMENT_ROLE }}
           aws-region: 'eu-west-2'
           dotnet-version: '8.x'
           template-file-path: ./src/NotifyService.Api/serveless.template

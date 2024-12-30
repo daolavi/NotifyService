@@ -1,27 +1,24 @@
 name: "SAM Build & Deploy"
 description: "Build & Deploy SAM application"
 inputs:
-   aws-access-key:
-     required: true
-     description: "AWS Access Key"
-   aws-secret-access-key:
-     required: true
-     description: "AWS Secret Key"
-   aws-region:
-     required: true
-     description: "AWS Region"
-   dotnet-version:
-     required: true
-     description: ".NET Version to configure"
-   template-file-path:
-     required: true
-     description: "Path to the SAM template file"
-   stack-name:
-     required: true
-     description: "The name of the CloudFormation stack to deploy"
-   s3-bucket-name:
-     required: true
-     description: "The name of the S3 bucket to store SAM artefacts"
+  aws-role:
+    required: true
+    description: "AWS Role"
+  aws-region:
+    required: true
+    description: "AWS Region"
+  dotnet-version:
+    required: true
+    description: ".NET Version to configure"
+  template-file-path:
+    required: true
+    description: "Path to the SAM template file"
+  stack-name:
+    required: true
+    description: "The name of the CloudFormation stack to deploy"
+  s3-bucket-name:
+    required: true
+    description: "The name of the S3 bucket to store SAM artefacts"
 
 runs:
   using: "composite"
@@ -34,8 +31,8 @@ runs:
           use-installer: true
     - uses: aws-actions/configure-aws-credentials@v2
       with:
-        aws-access-key-id: ${{ inputs.aws-access-key-id }}
-        aws-secret-access-key: ${{ inputs.aws-secret-key }}
+        role-to-assume: ${{ inputs.aws-role }}
+        role-session-name: GitHub_to_AWS_via_FederatedOIDC
         aws-region: ${{ inputs.aws-region }}
     
     # Build and deploy x86
