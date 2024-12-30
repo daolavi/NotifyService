@@ -13,6 +13,8 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers();
+        services.AddHealthChecks();
+        services.AddSwaggerGen();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
@@ -37,6 +39,9 @@ public class Startup
                 {
                     await context.Response.WriteAsync("Welcome to running ASP.NET Core on AWS Lambda");
                 });
+            endpoints.MapHealthChecks("/api/status").AllowAnonymous();
         });
+        app.UseSwagger();
+        app.UseSwaggerUI();
     }
 }
