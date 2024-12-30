@@ -1,5 +1,9 @@
 name: CI/CD Pipeline
 
+permissions:
+  id-token: write
+  contents: read
+
 on:
   # Trigger on pull requests
   pull_request:
