@@ -13,8 +13,8 @@ env:
   DOTNET_VERSION: '8.x'
   AWS_REGION: 'eu-west-2'
   PATH_TO_TEMPLATE_FILE: './src/NotifyService.Api/serverless.template'
-  STACK_NAME: 'NotifyService'
-  S3_BUCKET: 'Backend'
+  STACK_NAME: 'notify-service'
+  S3_BUCKET: 'dl-backend'
 
 jobs:
   build-and-test:
