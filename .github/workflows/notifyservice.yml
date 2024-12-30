@@ -1,58 +1,55 @@
-name: CI/CD Pipeline
+name: NotifyServiceApi
 
 on:
-  # Trigger on pull requests
   pull_request:
     branches:
       - main
 
-  # Trigger on pushes to the main branch
   push:
     branches:
       - main
+        
+env:
+  DOTNET_VERSION: '8.x'
+  AWS_REGION: 'eu-west-2'
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      # Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Setup .NET
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # Restore dependencies
       - name: Restore dependencies
         run: dotnet restore
 
-      # Build the project
       - name: Build the project
         run: dotnet build --configuration Release
 
-      # Run tests
       - name: Run unit tests
         run: dotnet test
 
   deploy:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main')
-    needs: build-and-test  # Ensure build and test job completes successfully
+    needs: build-and-test
     runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '8.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
       - uses: aws-actions/setup-sam@v2
       - uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: 'eu-west-2'
+          aws-region: ${{ env.AWS_REGION }}
       - run: sam build -t ./src/NotifyService.Api/serverless.template --parameter-overrides LambdaArchitecture=x86_64
         shell: bash
       - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name daotest --s3-prefix daotest --s3-bucket daonotifyservice --capabilities CAPABILITY_IAM --parameter-overrides LambdaArchitecture=x86_64

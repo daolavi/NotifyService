@@ -10,14 +10,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotifyService.Api.Tests", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{2ECFAB5E-05AE-4F0D-A01E-01C68F6B3DDC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "actions", "actions", "{F6EA61FD-94E4-4F20-AB33-FF3D981A5419}"
-	ProjectSection(SolutionItems) = preProject
-		.github\actions\action.yml = .github\actions\action.yml
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{D2ABA0FF-8B89-40BB-A602-BDE3608A7560}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\main.yml = .github\workflows\main.yml
+		.github\workflows\notifyservice.yml = .github\workflows\notifyservice.yml
 	EndProjectSection
 EndProject
 Global
@@ -38,7 +33,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{C3D5512A-75B7-423B-8E50-09702DC135C5} = {BF7DEDFD-331F-46CE-BC67-DF72958F89B5}
 		{8D40AE3C-B5EC-4072-9120-0088A66D103E} = {0564CEF6-1D88-40A9-AF9A-67033FBCC4F0}
-		{F6EA61FD-94E4-4F20-AB33-FF3D981A5419} = {2ECFAB5E-05AE-4F0D-A01E-01C68F6B3DDC}
 		{D2ABA0FF-8B89-40BB-A602-BDE3608A7560} = {2ECFAB5E-05AE-4F0D-A01E-01C68F6B3DDC}
 	EndGlobalSection
 EndGlobal
