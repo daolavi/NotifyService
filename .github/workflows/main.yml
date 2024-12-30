@@ -1,9 +1,5 @@
 name: CI/CD Pipeline
 
-permissions:
-  id-token: write
-  contents: read
-
 on:
   # Trigger on pull requests
   pull_request:
@@ -45,19 +41,19 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main')
     needs: build-and-test  # Ensure build and test job completes successfully
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: checkoutRepo
-        uses: actions/checkout@v2  
-
-      - name: Build and Deploy
-        uses: ./.github/actions
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v3
         with:
-          aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-2
           dotnet-version: '8.x'
-          template-file-path: ./src/NotifyService.Api/serveless.template
-          stack-name: daotest
-          s3-bucket-name: daonotifyservice
-      
+      - uses: aws-actions/setup-sam@v1
+      - uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'eu-west-2'
+      - run: sam build -t ./src/NotifyService.Api/serveless.template --parameter-overrides LambdaArchitecture=x86_64
+        shell: bash
+      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name daotest --s3-prefix daotest --s3-bucket daonotifyservice --capabilities CAPABILITY_IAM --parameter-overrides LambdaArchitecture=x86_64
+        shell: bash
