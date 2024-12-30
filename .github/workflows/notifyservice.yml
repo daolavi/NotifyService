@@ -1,4 +1,4 @@
-name: NotifyServiceApi
+name: NotifyService
 
 on:
   pull_request:
@@ -12,6 +12,9 @@ on:
 env:
   DOTNET_VERSION: '8.x'
   AWS_REGION: 'eu-west-2'
+  PATH_TO_TEMPLATE_FILE: './src/NotifyService.Api/serverless.template'
+  STACK_NAME: 'NotifyService'
+  S3_BUCKET: 'Backend'
 
 jobs:
   build-and-test:
@@ -50,7 +53,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-      - run: sam build -t ./src/NotifyService.Api/serverless.template --parameter-overrides LambdaArchitecture=x86_64
+      - run: sam build -t ${{ env.PATH_TO_TEMPLATE_FILE }} --parameter-overrides LambdaArchitecture=x86_64
         shell: bash
-      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name daotest --s3-prefix daotest --s3-bucket daonotifyservice --capabilities CAPABILITY_IAM --parameter-overrides LambdaArchitecture=x86_64
+      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name ${{ env.STACK_NAME }} --s3-prefix ${{ env.STACK_NAME }} --s3-bucket ${{ env.S3_BUCKET }} --capabilities CAPABILITY_IAM --parameter-overrides LambdaArchitecture=x86_64
         shell: bash
