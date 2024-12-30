@@ -47,13 +47,13 @@ jobs:
       - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '8.x'
-      - uses: aws-actions/setup-sam@v1
+      - uses: aws-actions/setup-sam@v2
       - uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'eu-west-2'
-      - run: sam build -t ./src/NotifyService.Api/serveless.template --parameter-overrides LambdaArchitecture=x86_64
+      - run: sam build -t ./src/NotifyService.Api/serverless.template --parameter-overrides LambdaArchitecture=x86_64
         shell: bash
       - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name daotest --s3-prefix daotest --s3-bucket daonotifyservice --capabilities CAPABILITY_IAM --parameter-overrides LambdaArchitecture=x86_64
         shell: bash
