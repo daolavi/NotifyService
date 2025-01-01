@@ -40,5 +40,9 @@ public class LambdaEntryPoint :
     /// <param name="builder">The IHostBuilder to configure.</param>
     protected override void Init(IHostBuilder builder)
     {
+        builder.ConfigureAppConfiguration((_, configurationBuilder) =>
+        {
+            configurationBuilder.AddAmazonSecretManager("eu-west-2", "NotifyServiceSecrets");
+        });
     }
 }

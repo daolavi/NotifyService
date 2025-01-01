@@ -12,5 +12,9 @@ public class LocalEntryPoint
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+            .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); })
+            .ConfigureAppConfiguration((_, configurationBuilder) =>
+            {
+                configurationBuilder.AddAmazonSecretManager("eu-west-2", "NotifyServiceSecrets");
+            });
 }

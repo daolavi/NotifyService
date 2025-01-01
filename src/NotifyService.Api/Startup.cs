@@ -1,4 +1,6 @@
-﻿namespace NotifyService.Api;
+﻿using SendGrid.Extensions.DependencyInjection;
+
+namespace NotifyService.Api;
 
 public class Startup
 {
@@ -15,6 +17,10 @@ public class Startup
         services.AddControllers();
         services.AddHealthChecks();
         services.AddSwaggerGen();
+        services.AddSendGrid(options =>
+        {
+            options.ApiKey = Configuration["SendGridApiKey"];
+        });
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline
