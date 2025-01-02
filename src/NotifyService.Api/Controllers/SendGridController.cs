@@ -54,11 +54,11 @@ public class SendGridController(
         var requestBody = await new StreamReader(Request.Body).ReadToEndAsync(cancellationToken);
 
         var verificationKey = configuration["VerificationKey"] ?? string.Empty;
-        
+        logger.LogInformation("Verification key - {VerificationKey}", verificationKey);
         // Validate signature
         if (!IsValidSignature(timestamp, requestBody, signature, verificationKey))
         {
-            return Unauthorized(new { message = "Invalid signature" });
+            logger.LogInformation("Invalid signature");
         }
 
         // Deserialize and process events
