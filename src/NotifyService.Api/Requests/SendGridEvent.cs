@@ -13,6 +13,6 @@ public class SendGridEvent
     [JsonPropertyName("timestamp")]
     public long Timestamp { get; set; }
     
-    [JsonPropertyName("custom_args")]
-    public Dictionary<string, string>? CustomArgs { get; set; }
+    [JsonPropertyName("unique_args")]
+    public Dictionary<string, string>? UniqueArguments { get; set; }
 }
