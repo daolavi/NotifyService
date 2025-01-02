@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using EllipticCurve;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using NotifyService.Api.Requests;
@@ -60,29 +61,40 @@ public class SendGridController(
         {
             logger.LogInformation("Invalid signature");
         }
+        else
+        {
+            logger.LogInformation("Valid signature");
+        }
 
         // Deserialize and process events
         var events = JsonSerializer.Deserialize<List<SendGridEvent>>(requestBody);
         foreach (var sgEvent in events)
         {
-            logger.LogInformation("Received Event {Event}", sgEvent);
+            logger.LogInformation("Received Event {Event}", JsonSerializer.Serialize(sgEvent));
         }
 
         return Ok();
     }
     
-    private bool IsValidSignature(string timestamp, string payload, string providedSignature, string key)
+    private bool IsValidSignature(string timestamp, string payload, string providedSignature, string verificationKey)
     {
         // Concatenate timestamp and payload
         var data = $"{timestamp}{payload}";
 
         // Compute HMAC-SHA256 hash
-        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(key));
+        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(verificationKey));
         var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
         var computedSignature = Convert.ToBase64String(hash);
 
         logger.LogInformation("Provided Signature - {ProvidedSignature}", providedSignature);
         logger.LogInformation("Computed Signature - {ComnputedSignature}", computedSignature);
+        
+        
+        var publicKey = PublicKey.fromPem(verificationKey);
+        var decodedSignature = Signature.fromBase64(providedSignature);
+    
+        return Ecdsa.verify(data, decodedSignature, publicKey);
+        
         // Compare computed signature with provided signature
         return computedSignature == providedSignature;
     }
