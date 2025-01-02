@@ -26,7 +26,7 @@ public class SendGridController(
             ReplyTo = new EmailAddress(request.ReplyTo),
             CustomArgs = new Dictionary<string, string>
             {
-                {"SendEmailRequestID", request.SendEmailRequestId.ToString()}
+                {"sendEmailRequestId", request.SendEmailRequestId.ToString()}
             }
         };
         
@@ -62,7 +62,7 @@ public class SendGridController(
         }
 
         // Deserialize and process events
-        var events = JsonSerializer.Deserialize<List<SendGridEvent>>(requestBody);
+        var events = JsonSerializer.Deserialize<List<object>>(requestBody);
         foreach (var sgEvent in events)
         {
             logger.LogInformation("Received Event {Event}", JsonSerializer.Serialize(sgEvent));
