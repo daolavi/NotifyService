@@ -1,14 +1,9 @@
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using EllipticCurve;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using NotifyService.Api.Requests;
 using SendGrid;
 using SendGrid.Helpers.Mail;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace NotifyService.Api.Controllers;
 
@@ -55,15 +50,11 @@ public class SendGridController(
         var requestBody = await new StreamReader(Request.Body).ReadToEndAsync(cancellationToken);
 
         var verificationKey = configuration["VerificationKey"] ?? string.Empty;
-        logger.LogInformation("Verification key - {VerificationKey}", verificationKey);
+        
         // Validate signature
         if (!IsValidSignature(timestamp, requestBody, signature, verificationKey))
         {
-            logger.LogInformation("Invalid signature");
-        }
-        else
-        {
-            logger.LogInformation("Valid signature");
+            return Unauthorized();
         }
 
         // Deserialize and process events
@@ -76,26 +67,14 @@ public class SendGridController(
         return Ok();
     }
     
-    private bool IsValidSignature(string timestamp, string payload, string providedSignature, string verificationKey)
+    private static bool IsValidSignature(string timestamp, string payload, string providedSignature, string verificationKey)
     {
         // Concatenate timestamp and payload
         var data = $"{timestamp}{payload}";
 
-        // Compute HMAC-SHA256 hash
-        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(verificationKey));
-        var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
-        var computedSignature = Convert.ToBase64String(hash);
-
-        logger.LogInformation("Provided Signature - {ProvidedSignature}", providedSignature);
-        logger.LogInformation("Computed Signature - {ComnputedSignature}", computedSignature);
-        
-        
         var publicKey = PublicKey.fromPem(verificationKey);
         var decodedSignature = Signature.fromBase64(providedSignature);
     
         return Ecdsa.verify(data, decodedSignature, publicKey);
-        
-        // Compare computed signature with provided signature
-        return computedSignature == providedSignature;
     }
 }
