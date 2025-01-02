@@ -23,7 +23,11 @@ public class SendGridController(
             TemplateId = request.TemplateId,
             Subject = request.Subject,
             From = new EmailAddress(request.From),
-            ReplyTo = new EmailAddress(request.ReplyTo)
+            ReplyTo = new EmailAddress(request.ReplyTo),
+            CustomArgs = new Dictionary<string, string>
+            {
+                {"SendEmailRequestID", request.SendEmailRequestId.ToString()}
+            }
         };
         
         email.AddTo(new EmailAddress(request.To));
@@ -69,7 +73,6 @@ public class SendGridController(
     
     private static bool IsValidSignature(string timestamp, string payload, string providedSignature, string verificationKey)
     {
-        // Concatenate timestamp and payload
         var data = $"{timestamp}{payload}";
 
         var publicKey = PublicKey.fromPem(verificationKey);

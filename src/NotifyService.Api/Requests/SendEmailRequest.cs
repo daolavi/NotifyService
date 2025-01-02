@@ -1,7 +1,7 @@
 namespace NotifyService.Api.Requests;
 
 public record SendEmailRequest(
-    Guid EmailRequestId,
+    Guid SendEmailRequestId,
     string Subject,
     string From,
     string To,
