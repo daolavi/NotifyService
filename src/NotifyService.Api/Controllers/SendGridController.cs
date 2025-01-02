@@ -81,6 +81,8 @@ public class SendGridController(
         var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
         var computedSignature = Convert.ToBase64String(hash);
 
+        logger.LogInformation("Provided Signature - {ProvidedSignature}", providedSignature);
+        logger.LogInformation("Computed Signature - {ComnputedSignature}", computedSignature);
         // Compare computed signature with provided signature
         return computedSignature == providedSignature;
     }
