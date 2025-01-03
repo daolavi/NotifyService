@@ -62,7 +62,7 @@ public class SendGridController(
         }
 
         // Deserialize and process events
-        var events = JsonSerializer.Deserialize<List<object>>(requestBody);
+        var events = JsonSerializer.Deserialize<List<SendGridEvent>>(requestBody);
         foreach (var sgEvent in events)
         {
             logger.LogInformation("Received Event {Event}", JsonSerializer.Serialize(sgEvent));
