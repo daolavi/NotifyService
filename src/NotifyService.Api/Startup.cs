@@ -1,4 +1,8 @@
-﻿using SendGrid.Extensions.DependencyInjection;
+﻿using Amazon.Runtime;
+using MassTransit;
+using MassTransit.AmazonSqsTransport.Configuration;
+using NotifyService.Api.Consumers;
+using SendGrid.Extensions.DependencyInjection;
 
 namespace NotifyService.Api;
 
@@ -20,6 +24,22 @@ public class Startup
         services.AddSendGrid(options =>
         {
             options.ApiKey = Configuration["SendGridApiKey"];
+        });
+        services.AddMassTransit(config =>
+        {
+            config.AddConsumer<SendEmailRequestConsumer>();
+
+            config.UsingAmazonSqs((context, cfg) =>
+            {
+                cfg.Host("eu-west-2", h =>
+                {
+                });
+                
+                cfg.ReceiveEndpoint("send-email-requests", e =>
+                {
+                    e.ConfigureConsumer<SendEmailRequestConsumer>(context);
+                });
+            });
         });
     }
 
