@@ -11,3 +11,6 @@ A Notify Service designed to handle HTTP requests, publish messages to AWS SQS, 
 - Publish event data to AWS SNS for further processing.
 
 ![Diagram](NotifyService.drawio.png)
+
+## Author
+- Dao Lam
