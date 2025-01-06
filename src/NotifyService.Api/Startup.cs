@@ -35,11 +35,8 @@ public class Startup
                 cfg.Host("eu-west-2", h =>
                 {
                 });
-                
-                cfg.ConfigureJsonSerializerOptions(o => new JsonSerializerOptions()
-                {
-                    PropertyNameCaseInsensitive = true,
-                });
+
+                cfg.ConfigureJsonSerializerOptions(o => new JsonSerializerOptions(JsonSerializerDefaults.Web));
                 
                 cfg.ReceiveEndpoint("send-email-requests", e =>
                 {
@@ -47,6 +44,7 @@ public class Startup
                 });
             });
         });
+        services.AddMassTransitHostedService();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline

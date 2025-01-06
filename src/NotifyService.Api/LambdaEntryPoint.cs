@@ -52,7 +52,7 @@ public class LambdaEntryPoint : APIGatewayProxyFunction
 
         if (jsonString.Contains("\"Records\""))
         {
-            var sqsEvent = JsonSerializer.Deserialize<SQSEvent>(jsonString);
+            var sqsEvent = JsonSerializer.Deserialize<SQSEvent>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             logger.LogInformation("Sqs event: {sqsEvent}", JsonSerializer.Serialize(sqsEvent));
             // var ep = scope.ServiceProvider.GetRequiredService<IReceiveEndpointDispatcher<SendEmailRequestConsumer>>();
             //
