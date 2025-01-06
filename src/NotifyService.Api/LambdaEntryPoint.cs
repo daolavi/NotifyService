@@ -26,6 +26,8 @@ public class LambdaEntryPoint :
     // will be the default and you must make Amazon.Lambda.AspNetCoreServer.APIGatewayHttpApiV2ProxyFunction the base class.
     Amazon.Lambda.AspNetCoreServer.APIGatewayProxyFunction
 {
+    private IServiceProvider _serviceProvider;
+    
     /// <summary>
     /// The builder has configuration, logging and Amazon API Gateway already configured. The startup class
     /// needs to be configured in this method using the UseStartup<>() method.
@@ -49,18 +51,27 @@ public class LambdaEntryPoint :
         {
             configurationBuilder.AddAmazonSecretManager("eu-west-2", "NotifyServiceSecrets");
         });
+        
+        builder.ConfigureServices(services =>
+        {
+            // Capture the service provider
+            _serviceProvider = services.BuildServiceProvider();
+        });
     }
 
     [LambdaSerializer(typeof (DefaultLambdaJsonSerializer))]
     public async Task FunctionHandlerAsync(object lambdaEvent, ILambdaContext context)
     {
+        var logger = _serviceProvider.GetService<ILogger<LambdaEntryPoint>>();
+        logger.LogInformation("LambdaEntryPoint: {LambdaEvent}", lambdaEvent);
+        
         switch (lambdaEvent)
         {
             case SQSEvent sqsEvent:
                 // Handle SQS messages with MassTransit
                 foreach (var record in sqsEvent.Records)
                 {
-                    Console.WriteLine($"Processing SQS message: {record.Body}");
+                    logger.LogInformation("Processing SQS message: {Message}", record.Body);
                 }
                 break;
 
