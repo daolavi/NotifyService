@@ -1,3 +1,8 @@
+using Amazon.Lambda.APIGatewayEvents;
+using Amazon.Lambda.Core;
+using Amazon.Lambda.SQSEvents;
+using MassTransit;
+
 namespace NotifyService.Api;
 
 /// <summary>
@@ -27,8 +32,7 @@ public class LambdaEntryPoint :
     /// <param name="builder">The IWebHostBuilder to configure.</param>
     protected override void Init(IWebHostBuilder builder)
     {
-        builder
-            .UseStartup<Startup>();
+        builder.UseStartup<Startup>();
     }
 
     /// <summary>
@@ -44,5 +48,27 @@ public class LambdaEntryPoint :
         {
             configurationBuilder.AddAmazonSecretManager("eu-west-2", "NotifyServiceSecrets");
         });
+    }
+
+    public async Task FunctionHandlerAsync(object lambdaEvent, ILambdaContext context)
+    {
+        switch (lambdaEvent)
+        {
+            case APIGatewayProxyRequest apiGatewayRequest:
+                // Handle HTTP requests via API Gateway
+                await base.FunctionHandlerAsync(apiGatewayRequest, context);
+                break;
+
+            case SQSEvent sqsEvent:
+                // Handle SQS messages with MassTransit
+                foreach (var record in sqsEvent.Records)
+                {
+                    Console.WriteLine($"Processing SQS message: {record.Body}");
+                }
+                break;
+
+            default:
+                throw new InvalidOperationException("Unsupported event type");
+        }
     }
 }
