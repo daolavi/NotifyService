@@ -56,11 +56,6 @@ public class LambdaEntryPoint :
     {
         switch (lambdaEvent)
         {
-            case APIGatewayProxyRequest apiGatewayRequest:
-                // Handle HTTP requests via API Gateway
-                await base.FunctionHandlerAsync(apiGatewayRequest, context);
-                break;
-
             case SQSEvent sqsEvent:
                 // Handle SQS messages with MassTransit
                 foreach (var record in sqsEvent.Records)
@@ -70,7 +65,9 @@ public class LambdaEntryPoint :
                 break;
 
             default:
-                throw new InvalidOperationException("Unsupported event type");
+                // Handle HTTP requests via API Gateway 
+                await base.FunctionHandlerAsync(lambdaEvent as APIGatewayProxyRequest, context);
+                break;
         }
     }
 }
