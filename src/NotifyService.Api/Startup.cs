@@ -1,4 +1,5 @@
 ﻿using MassTransit;
+using NotifyService.Api.Requests;
 using SendGrid.Extensions.DependencyInjection;
 
 namespace NotifyService.Api;
@@ -28,6 +29,11 @@ public class Startup
             {
                 cfg.Host("eu-west-2", h =>
                 {
+                });
+                
+                cfg.Message<SendGridEvent>(m =>
+                {
+                    m.SetEntityName("sendgrid-events-topic");
                 });
             });
         });

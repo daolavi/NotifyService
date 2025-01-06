@@ -13,7 +13,7 @@ namespace NotifyService.Api.Controllers;
 public class SendGridController(
     ILogger<SendGridController> logger,
     ISendGridClient sendGridClient,
-    ISendEndpointProvider sendEndpointProvider,
+    IPublishEndpoint publishEndpoint,
     IConfiguration configuration) : ControllerBase
 {
     [HttpPost("send-email")]
@@ -49,9 +49,6 @@ public class SendGridController(
     [HttpPost("receive-events")]
     public async Task<IActionResult> ReceiveEvents(CancellationToken cancellationToken)
     {
-        //var endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri("queue:send-email-requests"));
-        //await endpoint.Send(request, cancellationToken);
-        
         // Extract headers
         var signature = Request.Headers["X-Twilio-Email-Event-Webhook-Signature"].ToString();
         var timestamp = Request.Headers["X-Twilio-Email-Event-Webhook-Timestamp"].ToString();
@@ -70,6 +67,7 @@ public class SendGridController(
         foreach (var sgEvent in events)
         {
             logger.LogInformation("Received Event {Event}", JsonSerializer.Serialize(sgEvent));
+            await publishEndpoint.Publish(sgEvent, cancellationToken);
         }
 
         return Ok();
