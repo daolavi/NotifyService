@@ -1,8 +1,11 @@
+using System.Text.Json;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.AspNetCoreServer;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.Lambda.SQSEvents;
+
+[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
 namespace NotifyService.Api;
 
@@ -29,19 +32,30 @@ public class LambdaEntryPoint : APIGatewayProxyFunction
         });
     }
     
-    public override async Task<APIGatewayProxyResponse> FunctionHandlerAsync(APIGatewayProxyRequest request,
-        ILambdaContext context)
+    public async Task<APIGatewayProxyResponse> FunctionHandlerAsync(object input, ILambdaContext context)
     {
         var logger = _serviceProvider.GetService<ILogger<LambdaEntryPoint>>();
-        if (request != null)
+        
+        var jsonString = JsonSerializer.Serialize(input);
+        
+        if (jsonString.Contains("\"httpMethod\""))
         {
-            logger.LogInformation("LambdaEntryPoint: {Request}", request);
-            return await base.FunctionHandlerAsync(request, context);
+            var apiGatewayRequest = JsonSerializer.Deserialize<APIGatewayProxyRequest>(jsonString);
+            return await base.FunctionHandlerAsync(apiGatewayRequest, context);
         }
-        else
+
+        if (jsonString.Contains("\"Records\""))
         {
             logger.LogInformation("Masstransit will pick up SQS messages");
+            var sqsEvent = JsonSerializer.Deserialize<SQSEvent>(jsonString);
+            foreach (var record in sqsEvent.Records)
+            {
+                logger.LogInformation("Record: {Record}", record);
+            }
+            
             return await Task.FromResult<APIGatewayProxyResponse>(null!);
         }
+
+        throw new InvalidOperationException("Unsupported event type");
     }
 }
