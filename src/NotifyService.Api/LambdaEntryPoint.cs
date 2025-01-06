@@ -1,6 +1,7 @@
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.AspNetCoreServer;
 using Amazon.Lambda.Core;
+using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.Lambda.SQSEvents;
 
 namespace NotifyService.Api;
@@ -51,6 +52,7 @@ public class LambdaFunction
 {
     private readonly LambdaEntryPoint _entryPoint = new LambdaEntryPoint();
 
+    [LambdaSerializer(typeof (DefaultLambdaJsonSerializer))]
     public async Task FunctionHandlerAsync(object input, ILambdaContext context)
     {
         switch (input)
