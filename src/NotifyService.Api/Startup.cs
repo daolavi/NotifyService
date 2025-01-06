@@ -1,4 +1,5 @@
-﻿using Amazon.Runtime;
+﻿using System.Text.Json;
+using Amazon.Runtime;
 using MassTransit;
 using MassTransit.AmazonSqsTransport.Configuration;
 using NotifyService.Api.Consumers;
@@ -33,6 +34,11 @@ public class Startup
             {
                 cfg.Host("eu-west-2", h =>
                 {
+                });
+                
+                cfg.ConfigureJsonSerializerOptions(o => new JsonSerializerOptions()
+                {
+                    PropertyNameCaseInsensitive = true,
                 });
                 
                 cfg.ReceiveEndpoint("send-email-requests", e =>
