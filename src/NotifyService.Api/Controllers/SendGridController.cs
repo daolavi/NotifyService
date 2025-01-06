@@ -66,8 +66,8 @@ public class SendGridController(
         var events = JsonSerializer.Deserialize<List<SendGridEvent>>(requestBody);
         foreach (var sgEvent in events)
         {
-            logger.LogInformation("Received Event {Event}", JsonSerializer.Serialize(sgEvent));
             await publishEndpoint.Publish(sgEvent, cancellationToken);
+            logger.LogInformation("Published event {Event} to SNS", JsonSerializer.Serialize(sgEvent));
         }
 
         return Ok();
