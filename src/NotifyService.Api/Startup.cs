@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using Amazon.Runtime;
-using MassTransit;
-using MassTransit.AmazonSqsTransport.Configuration;
+﻿using MassTransit;
 using NotifyService.Api.Consumers;
 using SendGrid.Extensions.DependencyInjection;
 
@@ -35,8 +32,6 @@ public class Startup
                 cfg.Host("eu-west-2", h =>
                 {
                 });
-
-                cfg.ConfigureJsonSerializerOptions(o => new JsonSerializerOptions(JsonSerializerDefaults.Web));
                 
                 cfg.ReceiveEndpoint("send-email-requests", e =>
                 {
@@ -44,7 +39,6 @@ public class Startup
                 });
             });
         });
-        services.AddMassTransitHostedService();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline

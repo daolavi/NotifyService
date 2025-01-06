@@ -1,12 +1,11 @@
-using System.Text;
 using System.Text.Json;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.AspNetCoreServer;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.Lambda.SQSEvents;
-using MassTransit.Transports;
-using NotifyService.Api.Consumers;
+using MassTransit;
+using NotifyService.Api.Requests;
 
 [assembly: LambdaSerializer(typeof(DefaultLambdaJsonSerializer))]
 
@@ -30,7 +29,6 @@ public class LambdaEntryPoint : APIGatewayProxyFunction
         
         builder.ConfigureServices(services =>
         {
-            // Capture the service provider
             _serviceProvider = services.BuildServiceProvider();
         });
     }
@@ -54,22 +52,14 @@ public class LambdaEntryPoint : APIGatewayProxyFunction
         {
             var sqsEvent = JsonSerializer.Deserialize<SQSEvent>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             logger.LogInformation("Sqs event: {sqsEvent}", JsonSerializer.Serialize(sqsEvent));
-            // var ep = scope.ServiceProvider.GetRequiredService<IReceiveEndpointDispatcher<SendEmailRequestConsumer>>();
-            //
-            // foreach (var record in sqsEvent?.Records ?? [])
-            // {
-            //     var headers = new Dictionary<string, object>();
-            //     foreach (var key in record.Attributes.Keys)
-            //     {
-            //         headers[key] = record.Attributes[key];
-            //     }
-            //     foreach (var key in record.MessageAttributes.Keys)
-            //     {
-            //         headers[key] = record.MessageAttributes[key];
-            //     }
-            //     var body = Encoding.UTF8.GetBytes(record.Body);
-            //     await ep.Dispatch(body, headers, CancellationToken.None);
-            // }
+            
+            var busControl = scope.ServiceProvider.GetRequiredService<IBusControl>();
+
+            foreach (var message in sqsEvent!.Records)
+            {
+                await busControl.Publish(JsonSerializer.Deserialize<SendEmailRequest>(message.Body)!, CancellationToken.None);
+            }
+            
             return await Task.FromResult<APIGatewayProxyResponse>(null!);
         }
 
