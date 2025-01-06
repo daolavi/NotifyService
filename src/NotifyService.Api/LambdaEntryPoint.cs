@@ -1,8 +1,6 @@
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
-using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.Lambda.SQSEvents;
-using MassTransit;
 
 namespace NotifyService.Api;
 
@@ -12,6 +10,7 @@ namespace NotifyService.Api;
 /// 
 /// NotifyService.Api::NotifyService.Api.LambdaEntryPoint::FunctionHandlerAsync
 /// </summary>
+[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 public class LambdaEntryPoint :
 
     // The base class must be set to match the AWS service invoking the Lambda function. If not Amazon.Lambda.AspNetCoreServer
@@ -58,8 +57,7 @@ public class LambdaEntryPoint :
             _serviceProvider = services.BuildServiceProvider();
         });
     }
-
-    [LambdaSerializer(typeof (DefaultLambdaJsonSerializer))]
+    
     public async Task FunctionHandlerAsync(object lambdaEvent, ILambdaContext context)
     {
         var logger = _serviceProvider.GetService<ILogger<LambdaEntryPoint>>();
@@ -77,7 +75,9 @@ public class LambdaEntryPoint :
 
             default:
                 // Handle HTTP requests via API Gateway 
-                await base.FunctionHandlerAsync(lambdaEvent as APIGatewayProxyRequest, context);
+                var request =  lambdaEvent as APIGatewayProxyRequest;
+                logger.LogInformation("LambdaEntryPoint: {Request}", request);
+                await base.FunctionHandlerAsync(request, context);
                 break;
         }
     }
