@@ -4,6 +4,7 @@ using Amazon.Lambda.AspNetCoreServer;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.Lambda.SQSEvents;
+using MassTransit;
 
 [assembly: LambdaSerializer(typeof(DefaultLambdaJsonSerializer))]
 
@@ -42,19 +43,20 @@ public class LambdaEntryPoint : APIGatewayProxyFunction
         if (jsonString.Contains("\"httpMethod\""))
         {
             var apiGatewayRequest = JsonSerializer.Deserialize<APIGatewayProxyRequest>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            logger.LogInformation("ApiGatewayRequest: {ApiGatewayRequest}", apiGatewayRequest);
+            logger.LogInformation("ApiGatewayRequest: {ApiGatewayRequest}", JsonSerializer.Serialize(apiGatewayRequest));
             return await base.FunctionHandlerAsync(apiGatewayRequest, context);
         }
 
         if (jsonString.Contains("\"Records\""))
         {
             var sqsEvent = JsonSerializer.Deserialize<SQSEvent>(jsonString);
-            logger.LogInformation("Sqs event: {sqsEvent}", sqsEvent);
+            logger.LogInformation("Sqs event: {sqsEvent}", JsonSerializer.Serialize(sqsEvent));
             foreach (var record in sqsEvent.Records)
             {
-                logger.LogInformation("Record: {Record}", record);
+                logger.LogInformation("Record: {Record}", JsonSerializer.Serialize(record));
             }
-            
+            var busControl = _serviceProvider.GetService<IBusControl>();
+            await busControl.StartAsync();
             return await Task.FromResult<APIGatewayProxyResponse>(null!);
         }
 
