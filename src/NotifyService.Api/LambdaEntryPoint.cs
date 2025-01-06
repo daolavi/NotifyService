@@ -1,5 +1,6 @@
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
+using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.Lambda.SQSEvents;
 using MassTransit;
 
@@ -50,6 +51,7 @@ public class LambdaEntryPoint :
         });
     }
 
+    [LambdaSerializer(typeof (DefaultLambdaJsonSerializer))]
     public async Task FunctionHandlerAsync(object lambdaEvent, ILambdaContext context)
     {
         switch (lambdaEvent)
