@@ -1,5 +1,6 @@
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
+using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.Lambda.SQSEvents;
 
 namespace NotifyService.Api;
@@ -57,6 +58,7 @@ public class LambdaEntryPoint :
         });
     }
     
+    [LambdaSerializer(typeof (DefaultLambdaJsonSerializer))]
     public async Task FunctionHandlerAsync(object input, ILambdaContext context)
     {
         var logger = _serviceProvider.GetService<ILogger<LambdaEntryPoint>>();
