@@ -9,7 +9,7 @@
       "Type": "AWS::Serverless::Function",
       "Properties": {
         "FunctionName": "NotifyService",
-        "Handler": "NotifyService.Api::NotifyService.Api.LambdaEntryPoint::FunctionHandlerAsync",
+        "Handler": "NotifyService.Api::NotifyService.Api.LambdaFunction::FunctionHandlerAsync",
         "Runtime": "dotnet8",
         "CodeUri": "",
         "MemorySize": 512,
