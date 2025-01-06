@@ -41,7 +41,7 @@ public class LambdaEntryPoint : APIGatewayProxyFunction
         
         if (jsonString.Contains("\"httpMethod\""))
         {
-            var apiGatewayRequest = JsonSerializer.Deserialize<APIGatewayProxyRequest>(jsonString);
+            var apiGatewayRequest = JsonSerializer.Deserialize<APIGatewayProxyRequest>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             logger.LogInformation("ApiGatewayRequest: {ApiGatewayRequest}", apiGatewayRequest);
             return await base.FunctionHandlerAsync(apiGatewayRequest, context);
         }
