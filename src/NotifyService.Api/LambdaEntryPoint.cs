@@ -2,6 +2,7 @@ using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.SQSEvents;
 
+[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 namespace NotifyService.Api;
 
 /// <summary>
@@ -10,7 +11,6 @@ namespace NotifyService.Api;
 /// 
 /// NotifyService.Api::NotifyService.Api.LambdaEntryPoint::FunctionHandlerAsync
 /// </summary>
-[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 public class LambdaEntryPoint :
 
     // The base class must be set to match the AWS service invoking the Lambda function. If not Amazon.Lambda.AspNetCoreServer
