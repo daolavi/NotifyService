@@ -54,22 +54,22 @@ public class LambdaEntryPoint : APIGatewayProxyFunction
         {
             var sqsEvent = JsonSerializer.Deserialize<SQSEvent>(jsonString);
             logger.LogInformation("Sqs event: {sqsEvent}", JsonSerializer.Serialize(sqsEvent));
-            var ep = scope.ServiceProvider.GetRequiredService<IReceiveEndpointDispatcher<SendEmailRequestConsumer>>();
-            
-            foreach (var record in sqsEvent?.Records ?? [])
-            {
-                var headers = new Dictionary<string, object>();
-                foreach (var key in record.Attributes.Keys)
-                {
-                    headers[key] = record.Attributes[key];
-                }
-                foreach (var key in record.MessageAttributes.Keys)
-                {
-                    headers[key] = record.MessageAttributes[key];
-                }
-                var body = Encoding.UTF8.GetBytes(record.Body);
-                await ep.Dispatch(body, headers, CancellationToken.None);
-            }
+            // var ep = scope.ServiceProvider.GetRequiredService<IReceiveEndpointDispatcher<SendEmailRequestConsumer>>();
+            //
+            // foreach (var record in sqsEvent?.Records ?? [])
+            // {
+            //     var headers = new Dictionary<string, object>();
+            //     foreach (var key in record.Attributes.Keys)
+            //     {
+            //         headers[key] = record.Attributes[key];
+            //     }
+            //     foreach (var key in record.MessageAttributes.Keys)
+            //     {
+            //         headers[key] = record.MessageAttributes[key];
+            //     }
+            //     var body = Encoding.UTF8.GetBytes(record.Body);
+            //     await ep.Dispatch(body, headers, CancellationToken.None);
+            // }
             return await Task.FromResult<APIGatewayProxyResponse>(null!);
         }
 
