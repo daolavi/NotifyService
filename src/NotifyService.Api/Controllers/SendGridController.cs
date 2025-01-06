@@ -11,7 +11,8 @@ namespace NotifyService.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class SendGridController(
-    ILogger<SendGridController> logger, 
+    ILogger<SendGridController> logger,
+    ISendGridClient sendGridClient,
     ISendEndpointProvider sendEndpointProvider,
     IConfiguration configuration) : ControllerBase
 {
@@ -19,15 +20,38 @@ public class SendGridController(
     public async Task<IActionResult> SendEmail(SendEmailRequest request, CancellationToken cancellationToken)
     {
         logger.LogInformation("Received SendEmailRequest {Request}", request);
-        var endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri("queue:send-email-requests"));
-        await endpoint.Send(request, cancellationToken);
-        logger.LogInformation("Sent message to send-email-requests queue");
-        return Ok();
+        var email = new SendGridMessage()
+        {
+            TemplateId = request.TemplateId,
+            Subject = request.Subject,
+            From = new EmailAddress(request.From),
+            ReplyTo = new EmailAddress(request.ReplyTo),
+            CustomArgs = new Dictionary<string, string>
+            {
+                {"sendEmailRequestId", request.SendEmailRequestId.ToString()}
+            }
+        };
+        
+        email.AddTo(new EmailAddress(request.To));
+        
+        email.SetTemplateData(request.Data);
+        var result = await sendGridClient.SendEmailAsync(email, CancellationToken.None);
+        
+        if (!result.IsSuccessStatusCode)
+        {
+            return BadRequest(new { Message = $"Failed to send request to SendGrid. SendEmailRequestId : {request.SendEmailRequestId}"});
+        }
+
+        logger.LogInformation("Sent request to SendGrid successfully");
+        return Ok(new { Message = $"Sent request to SendGrid successfully. SendEmailRequestId : {request.SendEmailRequestId}"});
     }
 
     [HttpPost("receive-events")]
     public async Task<IActionResult> ReceiveEvents(CancellationToken cancellationToken)
     {
+        //var endpoint = await sendEndpointProvider.GetSendEndpoint(new Uri("queue:send-email-requests"));
+        //await endpoint.Send(request, cancellationToken);
+        
         // Extract headers
         var signature = Request.Headers["X-Twilio-Email-Event-Webhook-Signature"].ToString();
         var timestamp = Request.Headers["X-Twilio-Email-Event-Webhook-Timestamp"].ToString();
