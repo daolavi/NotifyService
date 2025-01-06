@@ -60,26 +60,17 @@ public class LambdaEntryPoint :
     }
     
     [LambdaSerializer(typeof(DefaultLambdaJsonSerializer))]
-    public async Task FunctionHandlerAsync(object input, ILambdaContext context)
+    public async Task FunctionHandlerAsync(APIGatewayProxyRequest input, ILambdaContext context)
     {
         var logger = _serviceProvider.GetService<ILogger<LambdaEntryPoint>>();
-        logger.LogInformation("LambdaEntryPoint: {Input}", input);
-        var input2 = JsonSerializer.Deserialize<object>(input.ToString());
-        if (input2 is APIGatewayProxyRequest apiGatewayRequest)
+        if (input != null)
         {
-            logger.LogInformation("LambdaEntryPoint: {ApiGatewayRequest}", apiGatewayRequest);
-            await base.FunctionHandlerAsync(apiGatewayRequest, context);
-        }
-        else if (input2 is SQSEvent sqsEvent)
-        {
-            foreach (var record in sqsEvent.Records)
-            {
-                logger.LogInformation("Processing SQS message: {Message}", record.Body);
-            }
+            logger.LogInformation("LambdaEntryPoint: {Input}", input);
+            await base.FunctionHandlerAsync(input, context);
         }
         else
         {
-            throw new InvalidOperationException("Unsupported input type");
+            logger.LogInformation("Processing SQS message");
         }
     }
 }
