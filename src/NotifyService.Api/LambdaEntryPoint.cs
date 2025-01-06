@@ -2,7 +2,6 @@ using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.SQSEvents;
 
-[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 namespace NotifyService.Api;
 
 /// <summary>
@@ -58,27 +57,26 @@ public class LambdaEntryPoint :
         });
     }
     
-    public async Task FunctionHandlerAsync(object lambdaEvent, ILambdaContext context)
+    public async Task FunctionHandlerAsync(object input, ILambdaContext context)
     {
         var logger = _serviceProvider.GetService<ILogger<LambdaEntryPoint>>();
-        logger.LogInformation("LambdaEntryPoint: {LambdaEvent}", lambdaEvent);
+        logger.LogInformation("LambdaEntryPoint: {Input}", input);
         
-        switch (lambdaEvent)
+        if (input is APIGatewayProxyRequest apiGatewayRequest)
         {
-            case SQSEvent sqsEvent:
-                // Handle SQS messages with MassTransit
-                foreach (var record in sqsEvent.Records)
-                {
-                    logger.LogInformation("Processing SQS message: {Message}", record.Body);
-                }
-                break;
-
-            default:
-                // Handle HTTP requests via API Gateway 
-                var request =  lambdaEvent as APIGatewayProxyRequest;
-                logger.LogInformation("LambdaEntryPoint: {Request}", request);
-                await base.FunctionHandlerAsync(request, context);
-                break;
+            logger.LogInformation("LambdaEntryPoint: {ApiGatewayRequest}", apiGatewayRequest);
+            await base.FunctionHandlerAsync(apiGatewayRequest, context);
+        }
+        else if (input is SQSEvent sqsEvent)
+        {
+            foreach (var record in sqsEvent.Records)
+            {
+                logger.LogInformation("Processing SQS message: {Message}", record.Body);
+            }
+        }
+        else
+        {
+            throw new InvalidOperationException("Unsupported input type");
         }
     }
 }
