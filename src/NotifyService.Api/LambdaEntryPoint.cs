@@ -5,7 +5,7 @@ using Amazon.Lambda.Core;
 using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.Lambda.SQSEvents;
 
-[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
+[assembly: LambdaSerializer(typeof(DefaultLambdaJsonSerializer))]
 
 namespace NotifyService.Api;
 
@@ -37,17 +37,19 @@ public class LambdaEntryPoint : APIGatewayProxyFunction
         var logger = _serviceProvider.GetService<ILogger<LambdaEntryPoint>>();
         
         var jsonString = JsonSerializer.Serialize(input);
+        logger.LogInformation("Input : {JsonString}", jsonString);
         
         if (jsonString.Contains("\"httpMethod\""))
         {
             var apiGatewayRequest = JsonSerializer.Deserialize<APIGatewayProxyRequest>(jsonString);
+            logger.LogInformation("ApiGatewayRequest: {ApiGatewayRequest}", apiGatewayRequest);
             return await base.FunctionHandlerAsync(apiGatewayRequest, context);
         }
 
         if (jsonString.Contains("\"Records\""))
         {
-            logger.LogInformation("Masstransit will pick up SQS messages");
             var sqsEvent = JsonSerializer.Deserialize<SQSEvent>(jsonString);
+            logger.LogInformation("Sqs event: {sqsEvent}", sqsEvent);
             foreach (var record in sqsEvent.Records)
             {
                 logger.LogInformation("Record: {Record}", record);
