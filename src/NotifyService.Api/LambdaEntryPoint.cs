@@ -1,10 +1,12 @@
+using System.Text;
 using System.Text.Json;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.AspNetCoreServer;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.Lambda.SQSEvents;
-using MassTransit;
+using MassTransit.Transports;
+using NotifyService.Api.Consumers;
 
 [assembly: LambdaSerializer(typeof(DefaultLambdaJsonSerializer))]
 
@@ -35,7 +37,8 @@ public class LambdaEntryPoint : APIGatewayProxyFunction
     
     public async Task<APIGatewayProxyResponse> FunctionHandlerAsync(object input, ILambdaContext context)
     {
-        var logger = _serviceProvider.GetService<ILogger<LambdaEntryPoint>>();
+        using var scope = _serviceProvider.CreateScope();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<LambdaEntryPoint>>();
         
         var jsonString = JsonSerializer.Serialize(input);
         logger.LogInformation("Input : {JsonString}", jsonString);
@@ -51,12 +54,22 @@ public class LambdaEntryPoint : APIGatewayProxyFunction
         {
             var sqsEvent = JsonSerializer.Deserialize<SQSEvent>(jsonString);
             logger.LogInformation("Sqs event: {sqsEvent}", JsonSerializer.Serialize(sqsEvent));
-            foreach (var record in sqsEvent.Records)
+            var ep = scope.ServiceProvider.GetRequiredService<IReceiveEndpointDispatcher<SendEmailRequestConsumer>>();
+            
+            foreach (var record in sqsEvent?.Records ?? [])
             {
-                logger.LogInformation("Record: {Record}", JsonSerializer.Serialize(record));
+                var headers = new Dictionary<string, object>();
+                foreach (var key in record.Attributes.Keys)
+                {
+                    headers[key] = record.Attributes[key];
+                }
+                foreach (var key in record.MessageAttributes.Keys)
+                {
+                    headers[key] = record.MessageAttributes[key];
+                }
+                var body = Encoding.UTF8.GetBytes(record.Body);
+                await ep.Dispatch(body, headers, CancellationToken.None);
             }
-            var busControl = _serviceProvider.GetService<IBusControl>();
-            await busControl.StartAsync();
             return await Task.FromResult<APIGatewayProxyResponse>(null!);
         }
 
