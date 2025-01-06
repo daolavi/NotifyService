@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.Serialization.SystemTextJson;
@@ -58,18 +59,18 @@ public class LambdaEntryPoint :
         });
     }
     
-    [LambdaSerializer(typeof (DefaultLambdaJsonSerializer))]
+    [LambdaSerializer(typeof(DefaultLambdaJsonSerializer))]
     public async Task FunctionHandlerAsync(object input, ILambdaContext context)
     {
         var logger = _serviceProvider.GetService<ILogger<LambdaEntryPoint>>();
         logger.LogInformation("LambdaEntryPoint: {Input}", input);
-        
-        if (input is APIGatewayProxyRequest apiGatewayRequest)
+        var input2 = JsonSerializer.Deserialize<object>(input.ToString());
+        if (input2 is APIGatewayProxyRequest apiGatewayRequest)
         {
             logger.LogInformation("LambdaEntryPoint: {ApiGatewayRequest}", apiGatewayRequest);
             await base.FunctionHandlerAsync(apiGatewayRequest, context);
         }
-        else if (input is SQSEvent sqsEvent)
+        else if (input2 is SQSEvent sqsEvent)
         {
             foreach (var record in sqsEvent.Records)
             {
