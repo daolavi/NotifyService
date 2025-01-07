@@ -36,7 +36,6 @@ public class IntegrationTestBase : IDisposable
                         s => SendGridSignatureValidationServiceMock.Object);
                     configureServices.AddTransient<ISendGridClient>(s => SendGridClientMock.Object);
                     configureServices.AddTransient<IPublishEndpoint>(s => publishEndpointMock.Object);
-                    configureServices.AddMassTransitTestHarness();
                 });
                 
                 builder.UseEnvironment("Development");
