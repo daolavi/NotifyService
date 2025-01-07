@@ -1,8 +1,8 @@
 using System.Text.Json;
-using EllipticCurve;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using NotifyService.Api.Requests;
+using NotifyService.Api.Services;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
@@ -14,6 +14,7 @@ public class SendGridController(
     ILogger<SendGridController> logger,
     ISendGridClient sendGridClient,
     IPublishEndpoint publishEndpoint,
+    ISendGridSignatureValidationService sendGridSignatureValidationService,
     IConfiguration configuration) : ControllerBase
 {
     [HttpPost("send-email")]
@@ -49,16 +50,14 @@ public class SendGridController(
     [HttpPost("receive-events")]
     public async Task<IActionResult> ReceiveEvents(CancellationToken cancellationToken)
     {
-        // Extract headers
         var signature = Request.Headers["X-Twilio-Email-Event-Webhook-Signature"].ToString();
         var timestamp = Request.Headers["X-Twilio-Email-Event-Webhook-Timestamp"].ToString();
 
-        // Read raw request body
         var requestBody = await new StreamReader(Request.Body).ReadToEndAsync(cancellationToken);
 
         var verificationKey = configuration["VerificationKey"] ?? string.Empty;
 
-        if (!IsValidSignature(timestamp, requestBody, signature, verificationKey))
+        if (!sendGridSignatureValidationService.IsValidSignature(timestamp, requestBody, signature, verificationKey))
         {
             return Unauthorized();
         }
@@ -71,15 +70,5 @@ public class SendGridController(
         }
 
         return Ok();
-    }
-    
-    private static bool IsValidSignature(string timestamp, string payload, string providedSignature, string verificationKey)
-    {
-        var data = $"{timestamp}{payload}";
-
-        var publicKey = PublicKey.fromPem(verificationKey);
-        var decodedSignature = Signature.fromBase64(providedSignature);
-    
-        return Ecdsa.verify(data, decodedSignature, publicKey);
     }
 }
