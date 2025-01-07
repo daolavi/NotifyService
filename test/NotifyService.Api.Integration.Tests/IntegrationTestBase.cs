@@ -1,6 +1,7 @@
 using System.Net;
 using AutoFixture;
 using MassTransit;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,6 +37,8 @@ public class IntegrationTestBase : IDisposable
                     configureServices.AddTransient<ISendGridClient>(s => SendGridClientMock.Object);
                     configureServices.AddTransient<IPublishEndpoint>(s => publishEndpointMock.Object);
                 });
+                
+                builder.UseEnvironment("Development");
             })
             .CreateClient();
     }
