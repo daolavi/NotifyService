@@ -34,7 +34,7 @@ jobs:
       - name: Build the project
         run: dotnet build --configuration Release
 
-      - name: Run unit tests
+      - name: Run tests
         run: dotnet test
 
   deploy:
